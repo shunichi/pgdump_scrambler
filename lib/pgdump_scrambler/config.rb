@@ -42,8 +42,9 @@ module PgdumpScrambler
 
     def unspecified_columns
       @table_hash.map do |_, table|
-        [table.name, table.unspecifiled_columns]
-      end.to_h
+        columns = table.unspecifiled_columns
+        [table.name, columns] unless columns.empty?
+      end.compact.to_h
     end
 
     def write(io)
