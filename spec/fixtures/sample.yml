@@ -1,7 +1,9 @@
 ---
-posts:
-  content: sbytes
-  title: sbytes
-users:
-  email: email
-  name: sbytes
+dump_path: sample.dump
+tables:
+  posts:
+    content: sbytes
+    title: sbytes
+  users:
+    email: email
+    name: sbytes

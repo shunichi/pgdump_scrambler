@@ -1,0 +1,66 @@
+# frozen_string_literal: true
+module PgdumpScrambler
+  class Config
+    class Table
+      attr_reader :name
+
+      def initialize(name, columns)
+        @name = name
+        @column_hash = columns.sort_by(&:name).map { |column| [column.name, column] }.to_h
+      end
+
+      def columns
+        @column_hash.values
+      end
+
+      def [](column_name)
+        @column_hash[column_name]
+      end
+
+      def update_with(other)
+        Table.new(name, other.column_hash.merge(@column_hash).values)
+      end
+
+      def options
+        columns.map(&:option).compact.map { |option| "-c #{name}:#{option}" }.join(' ')
+      end
+
+      def unspecifiled_columns
+        @column_hash.map(&:second).select(&:unspecifiled?).map(&:name)
+      end
+
+      protected
+
+      attr_reader :column_hash
+    end
+
+    class Column
+      SCRAMBLE_METHODS = %i[unspecified nop bytes sbytes digits email uemail inet].freeze
+      NOP_METHODS = %i[unspecified nop].freeze
+      attr_reader :name
+
+      def initialize(name, scramble_method = :unspecified)
+        scramble_method = scramble_method.to_sym
+        unless SCRAMBLE_METHODS.member?(scramble_method)
+          raise ArgumentError, "invalid scramble_method: #{scramble_method}"
+        end
+        @name = name
+        @scramble_method = scramble_method
+      end
+
+      def scramble_method
+        @scramble_method.to_s
+      end
+
+      def unspecifiled?
+        @scramble_method == :unspecified
+      end
+
+      def option
+        unless NOP_METHODS.member?(@scramble_method)
+          "#{@name}:#{scramble_method}"
+        end
+      end
+    end
+  end
+end
