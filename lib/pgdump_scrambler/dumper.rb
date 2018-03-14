@@ -10,6 +10,7 @@ module PgdumpScrambler
 
     def run
       puts "executing pg_dump..."
+      puts full_command
       Open3.popen3(full_command) do |i, o, e, t|
         i.close
         rio = [o, e]

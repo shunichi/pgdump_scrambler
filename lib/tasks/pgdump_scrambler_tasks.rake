@@ -43,4 +43,18 @@ namespace :pgdump_scrambler do
     config = PgdumpScrambler::Config.read_file(default_config_path)
     PgdumpScrambler::Dumper.new(config).run
   end
+
+  desc 'upload to s3'
+  task s3_upload: :environment do
+    config = PgdumpScrambler::Config.read_file(default_config_path)
+    uploader = PgdumpScrambler::S3Uploader.new(
+      s3_path: File.join(config.resolved_s3['prefix'], File::basename(config.dump_path)), 
+      local_path: config.dump_path, 
+      region: config.resolved_s3['region'], 
+      bucket: config.resolved_s3['bucket'], 
+      access_key_id: config.resolved_s3['access_key_id'], 
+      secret_key: config.resolved_s3['secret_key']
+    )
+    uploader.run
+  end
 end

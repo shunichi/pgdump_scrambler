@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'yaml'
+require 'erb'
 require 'config/table'
 
 module PgdumpScrambler
@@ -7,13 +8,23 @@ module PgdumpScrambler
     IGNORED_ACTIVE_RECORD_TABLES = %w[ar_internal_metadata schema_migrations].freeze
     IGNORED_ACTIVE_RECORD_COLUMNS = %w[id created_at updated_at].to_set.freeze
     IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS = [/_id\z/].freeze
-    KEY_DUMP_PARH = 'dump_path'
+    KEY_DUMP_PATH = 'dump_path'
     KEY_TABLES = 'tables'
-    attr_reader :dump_path
+    KEY_S3 = 's3'
+    DEFAULT_S3_PROPERTIES = {
+      'bucket' => 'YOUR_S3_BUCKET',
+      'region' => 'YOUR_S3_REGION',
+      'prefix' => 'YOUR_S3_PATH_PREFIX',
+      'access_key_id' => "<%= ENV['AWS_ACCESS_KEY_ID'] %>",
+      'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>"
+    }
+    attr_reader :dump_path, :s3, :resolved_s3
 
-    def initialize(tables, dump_path)
+    def initialize(tables, dump_path, s3)
       @table_hash = tables.sort_by(&:name).map { |table| [table.name, table] }.to_h
       @dump_path = dump_path
+      @s3 = s3
+      @resolved_s3 = s3.map { |k, v| [k, ERB.new(v).result] }.to_h if s3
     end
 
     def table_names
@@ -37,7 +48,7 @@ module PgdumpScrambler
         end
       end
       new_tables += (other.table_names - table_names).map { |table_name| other.table(table_name) }
-      Config.new(new_tables, @dump_path)
+      Config.new(new_tables, @dump_path, @s3)
     end
 
     def unspecified_columns
@@ -49,7 +60,8 @@ module PgdumpScrambler
 
     def write(io)
       yml = {}
-      yml[KEY_DUMP_PARH] = @dump_path
+      yml[KEY_DUMP_PATH] = @dump_path
+      yml[KEY_S3] = @s3 if @s3
       yml[KEY_TABLES] = @table_hash.map do |_, table|
         columns = table.columns
         unless columns.empty?
@@ -75,8 +87,8 @@ module PgdumpScrambler
     class << self
       def read(io)
         yml = YAML.load(io)
-        if yml['tables']
-          tables = yml['tables'].map do |table_name, columns|
+        if yml[KEY_TABLES]
+          tables = yml[KEY_TABLES].map do |table_name, columns|
             Table.new(
               table_name, 
               columns.map { |name, scramble_method| Column.new(name, scramble_method) }
@@ -85,7 +97,7 @@ module PgdumpScrambler
         else
           table = []
         end
-        Config.new(tables, yml[KEY_DUMP_PARH])
+        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3])
       end
 
       def read_file(path)
@@ -109,7 +121,7 @@ module PgdumpScrambler
               Table.new(table_name, columns)  
             end
           end.compact
-          Config.new(tables, 'scrambled.dump')
+          Config.new(tables, 'scrambled.dump', Config::DEFAULT_S3_PROPERTIES)
         end
       end
     end
