@@ -24,6 +24,8 @@ bundle exec rake pgdump_scrambler:config_from_db
 
 Fix column scramble functions in config/pgdump_scrambler.yml
 
+from:
+
 ```
 tables:
   users:
@@ -31,6 +33,8 @@ tables:
     name: unspecified
     age: unspecified
 ```
+
+to:
 
 ```
 tables:
