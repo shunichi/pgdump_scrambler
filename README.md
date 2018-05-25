@@ -1,8 +1,6 @@
 # PgdumpScrambler
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pgdump_scrambler`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Generate scrambled potgresql dump for rails application.
 
 ## Installation
 
@@ -24,7 +22,7 @@ Genarate config file.
 bundle exec rake pgdump_scrambler:config_from_db
 ```
 
-Fix config/pgdump_scrambler.yml
+Fix column scramble functions in config/pgdump_scrambler.yml
 
 ```
 tables:
@@ -42,14 +40,21 @@ tables:
     age: nop
 ```
 
-Dump the database.
+Dump the scrambled database.
 
 ```
 bundle exec rake pgdump_scrambler:dump
 ```
 
-## operation
+## scramble functions
 
+- `bytes` random bytes (each byte is one of `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-_`)
+- `sbytes` random bytes (each byte is one of `0123456789abcdefghijklmnopqrstuvwxyz`)
+- `digits` random digits
+- `email` random email address
+- `uemail` random unique email address
+- `inet` random ip address
+- `nop` untouched
 
 ## Development
 
