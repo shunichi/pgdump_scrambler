@@ -16,13 +16,40 @@ And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install pgdump_scrambler
-
 ## Usage
 
-TODO: Write usage instructions here
+Genarate config file.
+
+```
+bundle exec rake pgdump_scrambler:config_from_db
+```
+
+Fix config/pgdump_scrambler.yml
+
+```
+tables:
+  users:
+    email: unspecified
+    name: unspecified
+    age: unspecified
+```
+
+```
+tables:
+  users:
+    email: uemail
+    name: sbytes
+    age: nop
+```
+
+Dump the database.
+
+```
+bundle exec rake pgdump_scrambler:dump
+```
+
+## operation
+
 
 ## Development
 
