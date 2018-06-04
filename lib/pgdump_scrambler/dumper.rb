@@ -31,7 +31,7 @@ module PgdumpScrambler
     private
 
     def full_command
-      [pgdump_command, obfuscator_command].compact.join(' | ') + "> #{@output_path}"
+      [pgdump_command, obfuscator_command, 'gzip -c'].compact.join(' | ') + "> #{@output_path}"
     end
 
     def obfuscator_command

@@ -73,7 +73,7 @@ module PgdumpScrambler
       end.compact.to_h
       YAML.dump(yml, io)
     end
-    
+
     def write_file(path)
       File.open(path, 'w') do |io|
         write(io)
@@ -90,7 +90,7 @@ module PgdumpScrambler
         if yml[KEY_TABLES]
           tables = yml[KEY_TABLES].map do |table_name, columns|
             Table.new(
-              table_name, 
+              table_name,
               columns.map { |name, scramble_method| Column.new(name, scramble_method) }
             )
           end
@@ -113,15 +113,15 @@ module PgdumpScrambler
             klass = table_name.classify.constantize rescue nil
             if klass
               columns = klass.columns.map(&:name).reject do |name|
-                IGNORED_ACTIVE_RECORD_COLUMNS.member?(name) || 
+                IGNORED_ACTIVE_RECORD_COLUMNS.member?(name) ||
                   IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS.any? { |regexp| regexp.match?(name) }
-              end.map do |name| 
-                Column.new(name) 
+              end.map do |name|
+                Column.new(name)
               end
-              Table.new(table_name, columns)  
+              Table.new(table_name, columns)
             end
           end.compact
-          Config.new(tables, 'scrambled.dump', Config::DEFAULT_S3_PROPERTIES)
+          Config.new(tables, 'scrambled.dump.gz', Config::DEFAULT_S3_PROPERTIES)
         end
       end
     end
