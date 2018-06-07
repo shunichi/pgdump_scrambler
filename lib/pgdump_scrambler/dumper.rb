@@ -48,6 +48,7 @@ module PgdumpScrambler
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
       command << "--host='#{@db_config['host']}'" if @db_config['host']
       command << "--port='#{@db_config['port']}'" if @db_config['port']
+      command << @config.exclude_tables.map { |exclude_table| "--exclude-table=#{exclude_table}" }.join(' ') if @config.exclude_tables.present?
       command << @db_config['database']
       command.join(' ')
     end
