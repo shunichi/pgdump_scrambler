@@ -108,9 +108,11 @@ module PgdumpScrambler
 
       if defined?(Rails)
         def from_db
+          Rails.application.eager_load!
+          klasses_by_table = ActiveRecord::Base.descendants.map { |klass| [klass.table_name, klass] }.to_h
           table_names = ActiveRecord::Base.connection.tables.sort - IGNORED_ACTIVE_RECORD_TABLES
           tables = table_names.map do |table_name|
-            klass = table_name.classify.constantize rescue nil
+            klass = klasses_by_table[table_name]
             if klass
               columns = klass.columns.map(&:name).reject do |name|
                 IGNORED_ACTIVE_RECORD_COLUMNS.member?(name) ||
