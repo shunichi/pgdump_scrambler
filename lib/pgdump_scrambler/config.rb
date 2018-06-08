@@ -10,6 +10,7 @@ module PgdumpScrambler
     IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS = [/_id\z/].freeze
     KEY_DUMP_PATH = 'dump_path'
     KEY_TABLES = 'tables'
+    KEY_EXCLUDE_TABLES = 'exclude_tables'
     KEY_S3 = 's3'
     DEFAULT_S3_PROPERTIES = {
       'bucket' => 'YOUR_S3_BUCKET',
@@ -18,13 +19,14 @@ module PgdumpScrambler
       'access_key_id' => "<%= ENV['AWS_ACCESS_KEY_ID'] %>",
       'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>"
     }
-    attr_reader :dump_path, :s3, :resolved_s3
+    attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables
 
-    def initialize(tables, dump_path, s3)
+    def initialize(tables, dump_path, s3, exclude_tables)
       @table_hash = tables.sort_by(&:name).map { |table| [table.name, table] }.to_h
       @dump_path = dump_path
       @s3 = s3
       @resolved_s3 = s3.map { |k, v| [k, ERB.new(v).result] }.to_h if s3
+      @exclude_tables = exclude_tables
     end
 
     def table_names
@@ -48,7 +50,7 @@ module PgdumpScrambler
         end
       end
       new_tables += (other.table_names - table_names).map { |table_name| other.table(table_name) }
-      Config.new(new_tables, @dump_path, @s3)
+      Config.new(new_tables, @dump_path, @s3, @exclude_tables)
     end
 
     def unspecified_columns
@@ -62,6 +64,7 @@ module PgdumpScrambler
       yml = {}
       yml[KEY_DUMP_PATH] = @dump_path
       yml[KEY_S3] = @s3 if @s3
+      yml[KEY_EXCLUDE_TABLES] = @exclude_tables if @exclude_tables.size > 0
       yml[KEY_TABLES] = @table_hash.map do |_, table|
         columns = table.columns
         unless columns.empty?
@@ -95,9 +98,9 @@ module PgdumpScrambler
             )
           end
         else
-          table = []
+          tables = []
         end
-        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3])
+        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3], yml[KEY_EXCLUDE_TABLES] || [])
       end
 
       def read_file(path)
@@ -123,7 +126,7 @@ module PgdumpScrambler
               Table.new(table_name, columns)
             end
           end.compact
-          Config.new(tables, 'scrambled.dump.gz', Config::DEFAULT_S3_PROPERTIES)
+          Config.new(tables, 'scrambled.dump.gz', Config::DEFAULT_S3_PROPERTIES, [])
         end
       end
     end
