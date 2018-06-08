@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+arch = case RUBY_PLATFORM
+  when /64.*linux/
+    'linux-amd64'
+  when /darwin/
+    'darwin'
+  else
+    raise 'Invalid platform.'
+end
+
+args = $*.map { |x| x.include?(' ') ? "'" + x + "'" : x }
+cmd = File.expand_path "#{File.dirname(__FILE__)}/../libexec/pgdump-obfuscator-#{arch}"
+
+exec "#{cmd} #{args.join(' ')}"
