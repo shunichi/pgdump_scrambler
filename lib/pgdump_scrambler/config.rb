@@ -119,7 +119,7 @@ module PgdumpScrambler
             if klass
               columns = klass.columns.map(&:name).reject do |name|
                 IGNORED_ACTIVE_RECORD_COLUMNS.member?(name) ||
-                  IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS.any? { |regexp| regexp.match?(name) }
+                  IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS.any? { |regexp| regexp.match(name) }
               end.map do |name|
                 Column.new(name)
               end
