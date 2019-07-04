@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pgdump_scrambler (0.1.0)
+    pgdump_scrambler (0.2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -147,4 +147,4 @@ DEPENDENCIES
   rubocop
 
 BUNDLED WITH
-   1.16.1
+   1.17.2

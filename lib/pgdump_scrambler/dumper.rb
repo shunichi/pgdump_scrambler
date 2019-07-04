@@ -11,21 +11,11 @@ module PgdumpScrambler
     def run
       puts "executing pg_dump..."
       puts full_command
-      Open3.popen3(full_command) do |i, o, e, t|
-        i.close
-        rio = [o, e]
-        while rio.any? { |io| !io.eof? }
-          ready = IO.select(rio)
-          if readable = ready[0]
-            readable.each do |r|
-              r.each do |line|
-                puts line
-              end
-            end
-          end
-        end
+      if system(full_command)
+        puts "done!"
+      else
+        raise "pg_dump failed!"
       end
-      puts "done!"
     end
 
     private
