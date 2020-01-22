@@ -111,7 +111,11 @@ module PgdumpScrambler
 
       if defined?(Rails)
         def from_db
-          Rails.application.eager_load!
+          if defined?(Zeitwerk)
+            Zeitwerk::Loader.eager_load_all
+          else
+            Rails.application.eager_load!
+          end
           klasses_by_table = ActiveRecord::Base.descendants.map { |klass| [klass.table_name, klass] }.to_h
           table_names = ActiveRecord::Base.connection.tables.sort - IGNORED_ACTIVE_RECORD_TABLES
           tables = table_names.map do |table_name|
