@@ -111,7 +111,7 @@ module PgdumpScrambler
 
       if defined?(Rails)
         def from_db
-          if defined?(Zeitwerk)
+          if defined?(Zeitwerk) && Rails.autoloaders.zeitwerk_enabled?
             Zeitwerk::Loader.eager_load_all
           else
             Rails.application.eager_load!
