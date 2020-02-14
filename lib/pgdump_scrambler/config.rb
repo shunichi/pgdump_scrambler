@@ -7,7 +7,6 @@ module PgdumpScrambler
   class Config
     IGNORED_ACTIVE_RECORD_TABLES = %w[ar_internal_metadata schema_migrations].freeze
     IGNORED_ACTIVE_RECORD_COLUMNS = %w[id created_at updated_at].to_set.freeze
-    IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS = [/_id\z/].freeze
     KEY_DUMP_PATH = 'dump_path'
     KEY_TABLES = 'tables'
     KEY_EXCLUDE_TABLES = 'exclude_tables'
@@ -122,8 +121,7 @@ module PgdumpScrambler
             klass = klasses_by_table[table_name]
             if klass
               columns = klass.columns.map(&:name).reject do |name|
-                IGNORED_ACTIVE_RECORD_COLUMNS.member?(name) ||
-                  IGNORED_ACTIVE_RECORD_COLUMNS_REGEXPS.any? { |regexp| regexp.match(name) }
+                IGNORED_ACTIVE_RECORD_COLUMNS.member?(name)
               end.map do |name|
                 Column.new(name)
               end
