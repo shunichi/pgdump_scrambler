@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 namespace :pgdump_scrambler do
-  default_config_path = 'config/pgdump_scrambler.yml'
+  default_config_path = ENV['SCRAMBLER_CONFIG_PATH'] || 'config/pgdump_scrambler.yml'
 
   desc 'create config from database'
   task config_from_db: :environment do
-    config = 
+    config =
       if File.exist?(default_config_path)
         puts "#{default_config_path} found!\nmerge existing config with config from database"
         PgdumpScrambler::Config
@@ -48,11 +48,11 @@ namespace :pgdump_scrambler do
   task s3_upload: :environment do
     config = PgdumpScrambler::Config.read_file(default_config_path)
     uploader = PgdumpScrambler::S3Uploader.new(
-      s3_path: File.join(config.resolved_s3['prefix'], File::basename(config.dump_path)), 
-      local_path: config.dump_path, 
-      region: config.resolved_s3['region'], 
-      bucket: config.resolved_s3['bucket'], 
-      access_key_id: config.resolved_s3['access_key_id'], 
+      s3_path: File.join(config.resolved_s3['prefix'], File::basename(config.dump_path)),
+      local_path: config.dump_path,
+      region: config.resolved_s3['region'],
+      bucket: config.resolved_s3['bucket'],
+      access_key_id: config.resolved_s3['access_key_id'],
       secret_key: config.resolved_s3['secret_key']
     )
     uploader.run
