@@ -44,6 +44,15 @@ namespace :pgdump_scrambler do
     PgdumpScrambler::Dumper.new(config).run
   end
 
+  desc 'create scrambled dump'
+  task clear_dump: :environment do
+    config = PgdumpScrambler::Config.read_file(default_config_path)
+    if File.exists? config.dump_path
+      File.delete(config.dump_path)
+      puts "Dump file #{config.dump_path} has been deleted."
+    end
+  end
+
   desc 'upload to s3'
   task s3_upload: :environment do
     config = PgdumpScrambler::Config.read_file(default_config_path)
