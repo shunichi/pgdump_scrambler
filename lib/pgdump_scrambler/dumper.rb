@@ -35,6 +35,7 @@ module PgdumpScrambler
       command = []
       command << "PGPASSWORD=#{Shellwords.escape(@db_config['password'])}" if @db_config['password']
       command << 'pg_dump'
+      command << @config.pgdump_args if @config.pgdump_args
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
       command << "--host='#{@db_config['host']}'" if @db_config['host']
       command << "--port='#{@db_config['port']}'" if @db_config['port']
