@@ -102,4 +102,22 @@ RSpec.describe PgdumpScrambler do
     config = PgdumpScrambler::Config.read(StringIO.new(yaml))
     expect(config.obfuscator_options).to eq '-c posts:content:sbytes -c posts:title:sbytes -c users:email:uemail'
   end
+
+  it 'pgdump options' do
+    yaml = <<~YAML
+    ---
+    dump_path: scrambled.dump
+    pgdump_args: '-xc'
+    tables:
+      posts:
+        author: nop
+        content: sbytes
+        title: sbytes
+      users:
+        email: uemail
+        name: unspecified
+    YAML
+    config = PgdumpScrambler::Config.read(StringIO.new(yaml))
+    expect(config.pgdump_args).to eq '-xc'
+  end
 end

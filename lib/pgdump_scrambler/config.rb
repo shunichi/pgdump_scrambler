@@ -10,6 +10,7 @@ module PgdumpScrambler
     KEY_DUMP_PATH = 'dump_path'
     KEY_TABLES = 'tables'
     KEY_EXCLUDE_TABLES = 'exclude_tables'
+    KEY_PGDUMP_ARGS = 'pgdump_args'
     KEY_S3 = 's3'
     DEFAULT_S3_PROPERTIES = {
       'bucket' => 'YOUR_S3_BUCKET',
@@ -18,14 +19,15 @@ module PgdumpScrambler
       'access_key_id' => "<%= ENV['AWS_ACCESS_KEY_ID'] %>",
       'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>"
     }
-    attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables
+    attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables, :pgdump_args
 
-    def initialize(tables, dump_path, s3, exclude_tables)
+    def initialize(tables, dump_path, s3, exclude_tables, pgdump_args)
       @table_hash = tables.sort_by(&:name).map { |table| [table.name, table] }.to_h
       @dump_path = dump_path
       @s3 = s3
       @resolved_s3 = s3.map { |k, v| [k, ERB.new(v).result] }.to_h if s3
       @exclude_tables = exclude_tables
+      @pgdump_args = pgdump_args
     end
 
     def table_names
@@ -49,7 +51,7 @@ module PgdumpScrambler
         end
       end
       new_tables += (other.table_names - table_names).map { |table_name| other.table(table_name) }
-      Config.new(new_tables, @dump_path, @s3, @exclude_tables)
+      Config.new(new_tables, @dump_path, @s3, @exclude_tables, @pgdump_args)
     end
 
     def unspecified_columns
@@ -99,7 +101,7 @@ module PgdumpScrambler
         else
           tables = []
         end
-        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3], yml[KEY_EXCLUDE_TABLES] || [])
+        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3], yml[KEY_EXCLUDE_TABLES] || [], yml[KEY_PGDUMP_ARGS])
       end
 
       def read_file(path)
@@ -128,7 +130,7 @@ module PgdumpScrambler
               Table.new(table_name, columns)
             end
           end.compact
-          Config.new(tables, 'scrambled.dump.gz', Config::DEFAULT_S3_PROPERTIES, [])
+          Config.new(tables, 'scrambled.dump.gz', Config::DEFAULT_S3_PROPERTIES, [], nil)
         end
       end
     end
