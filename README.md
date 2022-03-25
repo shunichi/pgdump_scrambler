@@ -7,7 +7,7 @@ Generate scrambled potgresql dump for rails application.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'pgdump_scrambler'
+gem 'pgdump_scrambler', github: 'shunichi/pgdump_scrambler'
 ```
 
 And then execute:
