@@ -58,6 +58,7 @@ bundle exec rake pgdump_scrambler:dump
 - `email` random email address
 - `uemail` random unique email address
 - `inet` random ip address
+- `json` string value to random bytes, number value to random digits, keep data structure and key names
 - `nop` untouched
 
 ## Development
@@ -68,7 +69,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pgdump_scrambler.
+Bug reports and pull requests are welcome on GitHub at https://github.com/shunichi/pgdump_scrambler.
 
 ## License
 
