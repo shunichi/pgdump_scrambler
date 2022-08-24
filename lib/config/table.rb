@@ -35,7 +35,7 @@ module PgdumpScrambler
     end
 
     class Column
-      SCRAMBLE_METHODS = %i[unspecified nop bytes sbytes digits email uemail inet].freeze
+      SCRAMBLE_METHODS = %i[unspecified nop bytes sbytes digits email uemail inet json].freeze
       NOP_METHODS = %i[unspecified nop].freeze
       attr_reader :name
 
