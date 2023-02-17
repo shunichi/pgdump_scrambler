@@ -49,7 +49,7 @@ module PgdumpScrambler
         db_config = open(Rails.root.join('config', 'database.yml'), 'r') do |f|
           YAML.load(f)
         end
-        db_config[Rails.env]
+        db_config[Rails.env].key?('read_replica') ? db_config[Rails.env]['read_replica'] : db_config[Rails.env]
       end
     end
   end
