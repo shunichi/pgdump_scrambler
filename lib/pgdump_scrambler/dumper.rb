@@ -47,7 +47,7 @@ module PgdumpScrambler
     def load_database_yml
       if defined?(Rails)
         db_config = open(Rails.root.join('config', 'database.yml'), 'r') do |f|
-          YAML.load(f)
+          YAML.safe_load(f, permitted_classes: [], permitted_symbols: [], aliases: true)
         end
         db_config[Rails.env]
       end
