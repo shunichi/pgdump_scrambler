@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'yaml'
 require 'erb'
+require 'set'
 require 'config/table'
 
 module PgdumpScrambler
@@ -90,7 +91,7 @@ module PgdumpScrambler
 
     class << self
       def read(io)
-        yml = YAML.load(io)
+        yml = YAML.safe_load(io, permitted_classes: [], permitted_symbols: [], aliases: true)
         if yml[KEY_TABLES]
           tables = yml[KEY_TABLES].map do |table_name, columns|
             Table.new(
