@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 require 'yaml'
 require 'erb'
+require 'set'
 require 'config/table'
 
 module PgdumpScrambler
