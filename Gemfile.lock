@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pgdump_scrambler (0.3.0)
+    pgdump_scrambler (0.4.0)
 
 GEM
   remote: https://rubygems.org/
