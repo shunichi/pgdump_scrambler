@@ -59,11 +59,8 @@ module PgdumpScrambler
 
       def option
         unless NOP_METHODS.member?(@scramble_method)
-
-          # m = scramble_method.gsub(/[()]/) { "_#{$&}" }
           m = Shellwords.escape(scramble_method)
           "#{@name}:#{m}"
-          # "#{@name}:#{Shellwords.escape(scramble_method)}"
         end
       end
 
