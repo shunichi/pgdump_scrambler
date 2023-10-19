@@ -2,10 +2,10 @@
 dump_path: sample.dump
 tables:
   posts:
+    created_at: nop
     content: sbytes
     title: sbytes
-    created_at: nop
   users:
+    created_at: nop
     email: email
     name: sbytes
-    created_at: nop
