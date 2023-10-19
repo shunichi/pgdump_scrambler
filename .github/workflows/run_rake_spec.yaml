@@ -3,8 +3,9 @@ name: Ruby
 
 on:
   push:
-    branches:
-      - "*"
+    paths:
+      - "lib/**/*"
+      - "spec/**/*"
 
 permissions:
   contents: read
