@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'open3'
 module PgdumpScrambler
   class Dumper
@@ -9,13 +10,11 @@ module PgdumpScrambler
     end
 
     def run
-      puts "executing pg_dump..."
+      puts 'Executing pg_dump...'
       puts full_command
-      if system(full_command)
-        puts "done!"
-      else
-        raise "pg_dump failed!"
-      end
+      raise 'pg_dump failed!' unless system(full_command)
+
+      puts 'Done!'
     end
 
     private
@@ -25,10 +24,10 @@ module PgdumpScrambler
     end
 
     def obfuscator_command
-      if options = @config.obfuscator_options
-        command = File.expand_path('../../../bin/pgdump-obfuscator', __FILE__)
-        "#{command} #{options}"
-      end
+      return unless (options = @config.obfuscator_options)
+
+      command = File.expand_path('../../bin/pgdump-obfuscator', __dir__)
+      "#{command} #{options}"
     end
 
     def pgdump_command
@@ -39,18 +38,25 @@ module PgdumpScrambler
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
       command << "--host='#{@db_config['host']}'" if @db_config['host']
       command << "--port='#{@db_config['port']}'" if @db_config['port']
-      command << @config.exclude_tables.map { |exclude_table| "--exclude-table-data=#{exclude_table}" }.join(' ') if @config.exclude_tables.present?
+      if @config.exclude_tables.present?
+        command << @config.exclude_tables.map do |exclude_table|
+          "--exclude-table-data=#{exclude_table}"
+        end.join(' ')
+      end
       command << @db_config['database']
       command.join(' ')
     end
 
     def load_database_yml
-      if defined?(Rails)
-        db_config = open(Rails.root.join('config', 'database.yml'), 'r') do |f|
-          YAML.safe_load(f, permitted_classes: [], permitted_symbols: [], aliases: true)
-        end
-        db_config[Rails.env]
-      end
+      return unless defined?(Rails)
+
+      db_config = YAML.safe_load_file(
+        Rails.root.join('config', 'database.yml'),
+        permitted_classes: [],
+        permitted_symbols: [],
+        aliases: true
+      )
+      db_config[Rails.env]
     end
   end
 end
