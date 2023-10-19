@@ -1,3 +1,6 @@
+## [0.4.1] - 2023-10-19
+- Fix S3 upload
+
 ## [0.4.0] - 2023-10-18
 - Add scramble functions
 - Support ARM64 Linux/Mac
