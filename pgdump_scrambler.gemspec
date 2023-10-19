@@ -1,37 +1,30 @@
+# frozen_string_literal: true
 
-lib = File.expand_path("../lib", __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "pgdump_scrambler/version"
+require 'pgdump_scrambler/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "pgdump_scrambler"
+  spec.name          = 'pgdump_scrambler'
   spec.version       = PgdumpScrambler::VERSION
-  spec.authors       = ["Shunichi Ikegami"]
-  spec.email         = ["sike.tm@gmail.com"]
+  spec.authors       = ['Shunichi Ikegami']
+  spec.email         = ['sike.tm@gmail.com']
 
-  spec.summary       = %q{scramble pg_dump columns}
-  spec.description   = %q{scramble pg_dump columns.}
+  spec.summary       = 'scramble pg_dump columns'
+  spec.description   = 'scramble pg_dump columns.'
   spec.homepage      = 'https://github.com/shunichi/pgdump_scrambler'
-  spec.license       = "MIT"
+  spec.license       = 'MIT'
+  spec.required_ruby_version = '>= 2.7'
 
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = 'https://rubygems.org'
-  else
-    raise "RubyGems 2.0 or newer is required to protect against " \
-      "public gem pushes."
-  end
+  spec.metadata['homepage_uri'] = spec.homepage
+  spec.metadata['source_code_uri'] = 'https://github.com/shunichi/pgdump_scrambler'
+  spec.metadata['changelog_uri'] = 'https://github.com/shunichi/pgdump_scrambler/blob/main/CHANGELOG.md'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+  spec.files = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
-  spec.bindir        = "exe"
+  spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
-  spec.require_paths = ["lib"]
-
-  spec.add_development_dependency "rake", "~> 13.0"
-  spec.add_development_dependency "rspec", "~> 3.12"
-  spec.add_development_dependency "rails", "~> 7.0"
-  spec.add_development_dependency "rubocop"
+  spec.require_paths = ['lib']
 end

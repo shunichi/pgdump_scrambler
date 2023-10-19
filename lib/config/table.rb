@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module PgdumpScrambler
   class Config
     class Table
@@ -6,7 +7,7 @@ module PgdumpScrambler
 
       def initialize(name, columns)
         @name = name
-        @column_hash = columns.sort_by(&:name).map { |column| [column.name, column] }.to_h
+        @column_hash = columns.sort_by(&:name).to_h { |column| [column.name, column] }
       end
 
       def columns
@@ -36,21 +37,18 @@ module PgdumpScrambler
 
     class Column
       SCRAMBLE_METHODS = %w[unspecified nop bytes sbytes digits email uemail inet json nullify empty].freeze
-      SCRAMBLE_CONST_REGEXP = /\Aconst\[.+\]\z/
+      SCRAMBLE_CONST_REGEXP = /\Aconst\[.+\]\z/.freeze
       NOP_METHODS = %w[unspecified nop].freeze
       UNSPECIFIED = 'unspecified'
-      attr_reader :name
+      attr_reader :name, :scramble_method
 
       def initialize(name, scramble_method = UNSPECIFIED)
         unless self.class.valid_scramble_method?(scramble_method)
           raise ArgumentError, "invalid scramble_method: #{scramble_method}"
         end
+
         @name = name
         @scramble_method = scramble_method
-      end
-
-      def scramble_method
-        @scramble_method
       end
 
       def unspecifiled?
@@ -58,10 +56,10 @@ module PgdumpScrambler
       end
 
       def option
-        unless NOP_METHODS.member?(@scramble_method)
-          m = Shellwords.escape(scramble_method)
-          "#{@name}:#{m}"
-        end
+        return if NOP_METHODS.member?(@scramble_method)
+
+        m = Shellwords.escape(scramble_method)
+        "#{@name}:#{m}"
       end
 
       class << self
