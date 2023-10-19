@@ -4,6 +4,8 @@ tables:
   posts:
     content: sbytes
     title: sbytes
+    created_at: nop
   users:
     email: email
     name: sbytes
+    created_at: nop
