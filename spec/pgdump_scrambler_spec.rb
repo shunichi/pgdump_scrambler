@@ -6,8 +6,8 @@ RSpec.describe PgdumpScrambler do
     dump_path: sample.dump
     tables:
       posts:
-        created_at: nop
         content: sbytes
+        created_at: nop
         title: sbytes
       users:
         created_at: nop
