@@ -8,9 +8,11 @@ RSpec.describe PgdumpScrambler do
       posts:
         content: sbytes
         title: sbytes
+        created_at: nop
       users:
         email: email
         name: sbytes
+        created_at: nop
     YAML
     path = File.expand_path('../fixtures/sample.yml',  __FILE__)
     config = PgdumpScrambler::Config.read_file(path)
