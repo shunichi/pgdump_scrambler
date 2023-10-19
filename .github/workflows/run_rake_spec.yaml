@@ -3,6 +3,8 @@ name: Ruby
 
 on:
   push:
+    branches:
+      - "*"
 
 permissions:
   contents: read
