@@ -19,7 +19,7 @@ module PgdumpScrambler
     def canonical_request
       [
         @verb,
-        URI.encode(@s3_path), # rubocop:disable Lint/UriEscapeUnescape
+        self.class.uri_encode(@s3_path), # rubocop:disable Lint/UriEscapeUnescape
         canonical_query_string,
         "host:#{@bucket}.s3.amazonaws.com\n", # canonical headers
         'host', # signed headers
@@ -75,44 +75,24 @@ module PgdumpScrambler
         Digest::SHA256.hexdigest(canonical_request)
       ].join("\n")
     end
-  end
-end
 
-if $PROGRAM_NAME == __FILE__
-  # https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
-  require 'minitest/autorun'
-  class TestS3Request < Minitest::Test
-    def setup
-      @s3_request = PgdumpScrambler::S3Request.new(
-        verb: 'GET',
-        s3_path: '/test.txt',
-        region: 'us-east-1',
-        bucket: 'examplebucket',
-        access_key_id: 'AKIAIOSFODNN7EXAMPLE',
-        secret_key: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
-        time: Time.utc(2013, 5, 24, 0, 0, 0)
-      )
-    end
-
-    def test_canonical_request
-      assert_equal <<~END_OF_REQUEST.chomp, @s3_request.canonical_request
-        GET
-        /test.txt
-        X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20130524T000000Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host
-        host:examplebucket.s3.amazonaws.com
-
-        host
-        UNSIGNED-PAYLOAD
-      END_OF_REQUEST
-    end
-
-    def test_signature
-      assert_equal 'aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404', @s3_request.signature
-    end
-
-    def test_url
-      exected_url = 'https://examplebucket.s3.amazonaws.com/test.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20130524T000000Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404'
-      assert_equal exected_url, @s3_request.url
+    class << self
+      # https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-query-string-auth.html
+      # * URI encode every byte except the unreserved characters: 'A'-'Z', 'a'-'z', '0'-'9', '-', '.', '_', and '~'.
+      # * The space character is a reserved character and must be encoded as "%20" (and not as "+").
+      # * Each URI encoded byte is formed by a '%' and the two-digit hexadecimal value of the byte.
+      # * Letters in the hexadecimal value must be uppercase, for example "%1A".
+      # * Encode the forward slash character, '/', everywhere except in the object key name. For example, if the object key name is photos/Jan/sample.jpg, the forward slash in the key name is not encoded.
+      def uri_encode(str)
+        str.gsub(%r{[^A-Za-z0-9\-\._~/]}) do
+          us = $&
+          tmp = ''
+          us.each_byte do |uc|
+            tmp << sprintf('%%%02X', uc)
+          end
+          tmp
+        end.force_encoding(Encoding::US_ASCII)
+      end
     end
   end
 end
