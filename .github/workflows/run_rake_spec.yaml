@@ -26,6 +26,6 @@ jobs:
         ruby-version: '2.6.3'
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: setup
-        run bundle exec bin/setup
+      run: bundle exec bin/setup
     - name: Run tests
       run: bundle exec rake spec
