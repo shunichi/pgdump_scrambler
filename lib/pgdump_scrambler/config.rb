@@ -6,7 +6,7 @@ require 'config/table'
 module PgdumpScrambler
   class Config
     IGNORED_ACTIVE_RECORD_TABLES = %w[ar_internal_metadata schema_migrations].freeze
-    IGNORED_ACTIVE_RECORD_COLUMNS = %w[id created_at updated_at].to_set.freeze
+    IGNORED_ACTIVE_RECORD_COLUMNS = %w[id updated_at].to_set.freeze
     KEY_DUMP_PATH = 'dump_path'
     KEY_TABLES = 'tables'
     KEY_EXCLUDE_TABLES = 'exclude_tables'
