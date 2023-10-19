@@ -3,8 +3,6 @@ require 'yaml'
 require 'erb'
 require 'config/table'
 
-# test comment
-
 module PgdumpScrambler
   class Config
     IGNORED_ACTIVE_RECORD_TABLES = %w[ar_internal_metadata schema_migrations].freeze
