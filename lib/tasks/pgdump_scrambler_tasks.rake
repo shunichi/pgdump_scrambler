@@ -22,8 +22,8 @@ namespace :pgdump_scrambler do
   desc 'check if new columns exist'
   task check: :environment do
     config = PgdumpScrambler::Config
-             .read_file(default_config_path)
-             .update_with(PgdumpScrambler::Config.from_db)
+      .read_file(default_config_path)
+      .update_with(PgdumpScrambler::Config.from_db)
     unspecified_columns = config.unspecified_columns
     count = unspecified_columns.sum { |_, columns| columns.size }
     if count.positive?

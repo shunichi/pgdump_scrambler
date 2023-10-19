@@ -10,11 +10,11 @@ module PgdumpScrambler
     end
 
     def run
-      puts 'executing pg_dump...'
+      puts 'Executing pg_dump...'
       puts full_command
       raise 'pg_dump failed!' unless system(full_command)
 
-      puts 'done!'
+      puts 'Done!'
     end
 
     private

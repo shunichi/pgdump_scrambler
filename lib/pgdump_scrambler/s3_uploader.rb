@@ -45,7 +45,7 @@ module PgdumpScrambler
         res = http.request(req)
         raise S3UploadError, res if res.code != '200'
       end
-      puts "Done."
+      puts 'Done.'
     end
   end
 end

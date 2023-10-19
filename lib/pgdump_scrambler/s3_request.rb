@@ -41,7 +41,7 @@ module PgdumpScrambler
     def url
       encoded_path = self.class.uri_encode(@s3_path)
       File.join("https://#{@bucket}.s3.amazonaws.com/",
-                "#{encoded_path}?#{canonical_query_string}&X-Amz-Signature=#{signature}")
+        "#{encoded_path}?#{canonical_query_string}&X-Amz-Signature=#{signature}")
     end
 
     private

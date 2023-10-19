@@ -93,16 +93,17 @@ module PgdumpScrambler
     class << self
       def read(io)
         yml = YAML.safe_load(io, permitted_classes: [], permitted_symbols: [], aliases: true)
-        tables = if yml[KEY_TABLES]
-                   yml[KEY_TABLES].map do |table_name, columns|
-                     Table.new(
-                       table_name,
-                       columns.map { |name, scramble_method| Column.new(name, scramble_method) }
-                     )
-                   end
-                 else
-                   []
-                 end
+        tables =
+          if yml[KEY_TABLES]
+            yml[KEY_TABLES].map do |table_name, columns|
+              Table.new(
+                table_name,
+                columns.map { |name, scramble_method| Column.new(name, scramble_method) }
+              )
+            end
+          else
+            []
+          end
         Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3], yml[KEY_EXCLUDE_TABLES] || [], yml[KEY_PGDUMP_ARGS])
       end
 
