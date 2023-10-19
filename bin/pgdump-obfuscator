@@ -1,15 +1,19 @@
 #!/usr/bin/env ruby
+require 'shellwords'
 
 arch = case RUBY_PLATFORM
-  when /64.*linux/
+  when /aarch64-linux/
+    'linux-arm64'
+  when /x86_64-linux/
     'linux-amd64'
-  when /darwin/
-    'darwin'
+  when /x86_64-darwin/
+    'darwin-amd64'
+  when /arm64-darwin/
+    'darwin-arm64'
   else
-    raise 'Invalid platform.'
+    raise "Unsupported platform: #{RUBY_PLATFORM}"
 end
 
-args = $*.map { |x| x.include?(' ') ? "'" + x + "'" : x }
 cmd = File.expand_path "#{File.dirname(__FILE__)}/../libexec/pgdump-obfuscator-#{arch}"
 
-exec "#{cmd} #{args.join(' ')}"
+exec "#{cmd} #{Shellwords.join($*)}"

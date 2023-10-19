@@ -59,6 +59,9 @@ bundle exec rake pgdump_scrambler:dump
 - `uemail` random unique email address
 - `inet` random ip address
 - `json` string value to random bytes, number value to random digits, keep data structure and key names
+- `nullify` NULL
+- `empty` empty string
+- `const[VALUE]` constant value
 - `nop` untouched
 
 ## Development

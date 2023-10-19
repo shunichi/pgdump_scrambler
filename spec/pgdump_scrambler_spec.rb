@@ -50,7 +50,7 @@ RSpec.describe PgdumpScrambler do
         email: email
         name: sbytes
     YAML
-    
+
     yaml2 = <<~YAML
     ---
     dump_path: scrambled.dump
@@ -98,9 +98,10 @@ RSpec.describe PgdumpScrambler do
       users:
         email: uemail
         name: unspecified
+        disabled: const[f]
     YAML
     config = PgdumpScrambler::Config.read(StringIO.new(yaml))
-    expect(config.obfuscator_options).to eq '-c posts:content:sbytes -c posts:title:sbytes -c users:email:uemail'
+    expect(config.obfuscator_options).to eq "-c posts:content:sbytes -c posts:title:sbytes -c users:disabled:const\\[f\\] -c users:email:uemail"
   end
 
   it 'pgdump options' do

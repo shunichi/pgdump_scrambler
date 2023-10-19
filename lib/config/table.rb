@@ -35,13 +35,14 @@ module PgdumpScrambler
     end
 
     class Column
-      SCRAMBLE_METHODS = %i[unspecified nop bytes sbytes digits email uemail inet json].freeze
-      NOP_METHODS = %i[unspecified nop].freeze
+      SCRAMBLE_METHODS = %w[unspecified nop bytes sbytes digits email uemail inet json nullify empty].freeze
+      SCRAMBLE_CONST_REGEXP = /\Aconst\[.+\]\z/
+      NOP_METHODS = %w[unspecified nop].freeze
+      UNSPECIFIED = 'unspecified'
       attr_reader :name
 
-      def initialize(name, scramble_method = :unspecified)
-        scramble_method = scramble_method.to_sym
-        unless SCRAMBLE_METHODS.member?(scramble_method)
+      def initialize(name, scramble_method = UNSPECIFIED)
+        unless self.class.valid_scramble_method?(scramble_method)
           raise ArgumentError, "invalid scramble_method: #{scramble_method}"
         end
         @name = name
@@ -49,16 +50,23 @@ module PgdumpScrambler
       end
 
       def scramble_method
-        @scramble_method.to_s
+        @scramble_method
       end
 
       def unspecifiled?
-        @scramble_method == :unspecified
+        @scramble_method == UNSPECIFIED
       end
 
       def option
         unless NOP_METHODS.member?(@scramble_method)
-          "#{@name}:#{scramble_method}"
+          m = Shellwords.escape(scramble_method)
+          "#{@name}:#{m}"
+        end
+      end
+
+      class << self
+        def valid_scramble_method?(scramble_method)
+          SCRAMBLE_CONST_REGEXP.match?(scramble_method) || SCRAMBLE_METHODS.member?(scramble_method)
         end
       end
     end
