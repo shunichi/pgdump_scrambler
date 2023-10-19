@@ -19,7 +19,7 @@ module PgdumpScrambler
     def canonical_request
       [
         @verb,
-        URI.encode(@s3_path),
+        URI.encode(@s3_path), # rubocop:disable Lint/UriEscapeUnescape
         canonical_query_string,
         "host:#{@bucket}.s3.amazonaws.com\n", # canonical headers
         'host', # signed headers

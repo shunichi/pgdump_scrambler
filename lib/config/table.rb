@@ -37,7 +37,7 @@ module PgdumpScrambler
 
     class Column
       SCRAMBLE_METHODS = %w[unspecified nop bytes sbytes digits email uemail inet json nullify empty].freeze
-      SCRAMBLE_CONST_REGEXP = /\Aconst\[.+\]\z/.freeze
+      SCRAMBLE_CONST_REGEXP = /\Aconst\[.+\]\z/
       NOP_METHODS = %w[unspecified nop].freeze
       UNSPECIFIED = 'unspecified'
       attr_reader :name, :scramble_method
