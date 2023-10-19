@@ -39,8 +39,9 @@ module PgdumpScrambler
     end
 
     def url
+      encoded_path = self.class.uri_encode(@s3_path)
       File.join("https://#{@bucket}.s3.amazonaws.com/",
-                "#{@s3_path}?#{canonical_query_string}&X-Amz-Signature=#{signature}")
+                "#{encoded_path}?#{canonical_query_string}&X-Amz-Signature=#{signature}")
     end
 
     private
@@ -88,7 +89,7 @@ module PgdumpScrambler
       def uri_encode(str)
         str.gsub(%r{[^A-Za-z0-9\-._~/]}) do
           us = Regexp.last_match(0)
-          tmp = ''
+          tmp = +''
           us.each_byte do |uc|
             tmp << sprintf('%%%02X', uc)
           end

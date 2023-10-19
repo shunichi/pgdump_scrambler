@@ -32,7 +32,7 @@ module PgdumpScrambler
 
     def run
       uri = URI.parse(@s3_request.url)
-      puts "upload #{@local_path} to #{uri.host}#{uri.path}"
+      puts "Uploading #{@local_path} to #{uri.host}#{uri.path}"
       File.open(@local_path, 'r') do |io|
         uri_path = uri.path
         uri_path += "?#{uri.query}" if uri.query
@@ -45,6 +45,7 @@ module PgdumpScrambler
         res = http.request(req)
         raise S3UploadError, res if res.code != '200'
       end
+      puts "Done."
     end
   end
 end
