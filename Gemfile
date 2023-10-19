@@ -10,5 +10,8 @@ gemspec
 gem 'rails', '~> 7.0'
 
 gem 'rake', '~> 13.0'
+
 gem 'rspec', '~> 3.12'
-gem 'rubocop'
+
+gem 'rubocop', '1.57.1'
+gem 'rubocop-rspec', '2.24.1'

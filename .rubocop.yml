@@ -1,8 +1,13 @@
+require: rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 3.0
   NewCops: enable
 
 Style/Documentation:
+  Enabled: false
+
+Style/FormatString:
   Enabled: false
 
 Metrics/AbcSize:
@@ -21,4 +26,13 @@ Metrics/CyclomaticComplexity:
   Enabled: false
 
 Metrics/PerceivedComplexity:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
+RSpec/MultipleExpectations:
   Enabled: false

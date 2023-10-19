@@ -2,7 +2,7 @@
 
 require 'net/http'
 require 'uri'
-require_relative './s3_request'
+require_relative 's3_request'
 
 module PgdumpScrambler
   class S3UploadError < StandardError

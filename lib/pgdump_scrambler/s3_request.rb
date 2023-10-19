@@ -19,7 +19,7 @@ module PgdumpScrambler
     def canonical_request
       [
         @verb,
-        self.class.uri_encode(@s3_path), # rubocop:disable Lint/UriEscapeUnescape
+        self.class.uri_encode(@s3_path),
         canonical_query_string,
         "host:#{@bucket}.s3.amazonaws.com\n", # canonical headers
         'host', # signed headers
@@ -82,10 +82,12 @@ module PgdumpScrambler
       # * The space character is a reserved character and must be encoded as "%20" (and not as "+").
       # * Each URI encoded byte is formed by a '%' and the two-digit hexadecimal value of the byte.
       # * Letters in the hexadecimal value must be uppercase, for example "%1A".
-      # * Encode the forward slash character, '/', everywhere except in the object key name. For example, if the object key name is photos/Jan/sample.jpg, the forward slash in the key name is not encoded.
+      # * Encode the forward slash character, '/', everywhere except in the object key name.
+      #   For example, if the object key name is photos/Jan/sample.jpg,
+      #   the forward slash in the key name is not encoded.
       def uri_encode(str)
-        str.gsub(%r{[^A-Za-z0-9\-\._~/]}) do
-          us = $&
+        str.gsub(%r{[^A-Za-z0-9\-._~/]}) do
+          us = Regexp.last_match(0)
           tmp = ''
           us.each_byte do |uc|
             tmp << sprintf('%%%02X', uc)
