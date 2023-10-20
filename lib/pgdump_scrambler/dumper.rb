@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 require 'open3'
+require 'erb'
+
 module PgdumpScrambler
   class Dumper
     def initialize(config, db_config = {})
@@ -46,10 +48,11 @@ module PgdumpScrambler
 
     def load_database_yml
       if defined?(Rails)
-        db_config = open(Rails.root.join('config', 'database.yml'), 'r') do |f|
-          YAML.load(f)
-        end
-        db_config[Rails.env]
+        database_yaml_file = File.read(Rails.root.join('config', 'database.yml'))
+        database_yaml_body = ERB.new(database_yaml_file).result
+        db_config = YAML.load(database_yaml_body)
+
+        db_config[Rails.env].key?('read_replica') ? db_config[Rails.env]['read_replica'] : db_config[Rails.env]
       end
     end
   end
