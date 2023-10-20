@@ -7,8 +7,10 @@ RSpec.describe PgdumpScrambler do
     tables:
       posts:
         content: sbytes
+        created_at: nop
         title: sbytes
       users:
+        created_at: nop
         email: email
         name: sbytes
     YAML
