@@ -52,7 +52,7 @@ RSpec.describe PgdumpScrambler do
         email: email
         name: sbytes
     YAML
-    
+
     yaml2 = <<~YAML
     ---
     dump_path: scrambled.dump
@@ -86,6 +86,16 @@ RSpec.describe PgdumpScrambler do
     io = StringIO.new
     merged.write(io)
     expect(io.string).to eq expected
+  end
+
+  it 'reads file and dump' do
+    path = File.expand_path('../fixtures/sample.yml',  __FILE__)
+    config = PgdumpScrambler::Config.read_file(path)
+
+    $stdout = StringIO.new
+    PgdumpScrambler::Dumper.new(config).run
+    output = $stdout.string
+    expect(output).to include('done!')
   end
 
   it 'creates obfuscator options' do
