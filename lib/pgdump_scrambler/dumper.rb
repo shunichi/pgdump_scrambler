@@ -14,12 +14,18 @@ module PgdumpScrambler
     def run
       puts 'Executing pg_dump...'
       puts full_command
-      raise 'pg_dump failed!' unless system(full_command)
+      raise 'pg_dump failed!' unless system(env_vars, full_command)
 
       puts 'Done!'
     end
 
     private
+
+    def env_vars
+      vars = {}
+      vars['PGPASSWORD'] = @db_config['password'] if @db_config['password']
+      vars
+    end
 
     def full_command
       [pgdump_command, obfuscator_command, 'gzip -c'].compact.join(' | ') + "> #{@output_path}"
@@ -34,7 +40,6 @@ module PgdumpScrambler
 
     def pgdump_command
       command = []
-      command << "PGPASSWORD=#{Shellwords.escape(@db_config['password'])}" if @db_config['password']
       command << 'pg_dump'
       command << @config.pgdump_args if @config.pgdump_args
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
