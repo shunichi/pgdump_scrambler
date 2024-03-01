@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require 'pgdump_scrambler/utils'
 require 'open3'
+
 module PgdumpScrambler
   class Dumper
     def initialize(config, db_config = {})
@@ -12,12 +14,18 @@ module PgdumpScrambler
     def run
       puts 'Executing pg_dump...'
       puts full_command
-      raise 'pg_dump failed!' unless system(full_command)
+      raise 'pg_dump failed!' unless system(env_vars, full_command)
 
       puts 'Done!'
     end
 
     private
+
+    def env_vars
+      vars = {}
+      vars['PGPASSWORD'] = @db_config['password'] if @db_config['password']
+      vars
+    end
 
     def full_command
       [pgdump_command, obfuscator_command, 'gzip -c'].compact.join(' | ') + "> #{@output_path}"
@@ -32,7 +40,6 @@ module PgdumpScrambler
 
     def pgdump_command
       command = []
-      command << "PGPASSWORD=#{Shellwords.escape(@db_config['password'])}" if @db_config['password']
       command << 'pg_dump'
       command << @config.pgdump_args if @config.pgdump_args
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
@@ -50,12 +57,7 @@ module PgdumpScrambler
     def load_database_yml
       return unless defined?(Rails)
 
-      db_config = YAML.safe_load_file(
-        Rails.root.join('config', 'database.yml'),
-        permitted_classes: [],
-        permitted_symbols: [],
-        aliases: true
-      )
+      db_config = Utils.load_yaml_with_erb(Rails.root.join('config', 'database.yml'))
       db_config[Rails.env]
     end
   end
