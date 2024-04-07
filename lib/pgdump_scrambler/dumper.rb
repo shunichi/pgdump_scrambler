@@ -6,7 +6,7 @@ require 'open3'
 module PgdumpScrambler
   class Dumper
     def initialize(config, db_config = {})
-      @db_config = db_config.empty? ? load_database_yml : config
+      @db_config = db_config.empty? ? load_database_yml : db_config
       @config = config
       @output_path = config.dump_path
     end
