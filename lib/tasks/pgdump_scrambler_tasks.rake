@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 namespace :pgdump_scrambler do
   default_config_path = ENV['SCRAMBLER_CONFIG_PATH'] || 'config/pgdump_scrambler.yml'
 
@@ -6,15 +7,16 @@ namespace :pgdump_scrambler do
   task config_from_db: :environment do
     config =
       if File.exist?(default_config_path)
-        puts "#{default_config_path} found!\nmerge existing config with config from database"
+        puts "#{default_config_path} found!\nMerging existing config with config from database"
         PgdumpScrambler::Config
           .read_file(default_config_path)
           .update_with(PgdumpScrambler::Config.from_db)
       else
-        puts "craete config from database"
+        puts 'Creating a config file from database'
         PgdumpScrambler::Config.from_db
       end
     config.write_file(default_config_path)
+    puts "Wrote to #{default_config_path}"
   end
 
   desc 'check if new columns exist'
@@ -24,7 +26,7 @@ namespace :pgdump_scrambler do
       .update_with(PgdumpScrambler::Config.from_db)
     unspecified_columns = config.unspecified_columns
     count = unspecified_columns.sum { |_, columns| columns.size }
-    if count > 0
+    if count.positive?
       unspecified_columns.each_key do |table_name|
         puts "#{table_name}:"
         unspecified_columns[table_name].each do |column_name|
@@ -34,7 +36,7 @@ namespace :pgdump_scrambler do
       puts "#{count} unspecified columns found!"
       exit 1
     else
-      puts "No unspecified columns found."
+      puts 'No unspecified columns found.'
     end
   end
 
@@ -47,7 +49,7 @@ namespace :pgdump_scrambler do
   desc 'create scrambled dump'
   task clear_dump: :environment do
     config = PgdumpScrambler::Config.read_file(default_config_path)
-    if File.exists? config.dump_path
+    if File.exist? config.dump_path
       File.delete(config.dump_path)
       puts "Dump file #{config.dump_path} has been deleted."
     end
@@ -57,7 +59,7 @@ namespace :pgdump_scrambler do
   task s3_upload: :environment do
     config = PgdumpScrambler::Config.read_file(default_config_path)
     uploader = PgdumpScrambler::S3Uploader.new(
-      s3_path: File.join(config.resolved_s3['prefix'], File::basename(config.dump_path)),
+      s3_path: File.join(config.resolved_s3['prefix'], File.basename(config.dump_path)),
       local_path: config.dump_path,
       region: config.resolved_s3['region'],
       bucket: config.resolved_s3['bucket'],

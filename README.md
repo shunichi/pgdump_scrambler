@@ -7,7 +7,7 @@ Generate scrambled potgresql dump for rails application.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'pgdump_scrambler', github: 'shunichi/pgdump_scrambler'
+gem 'pgdump_scrambler'
 ```
 
 And then execute:
@@ -58,6 +58,10 @@ bundle exec rake pgdump_scrambler:dump
 - `email` random email address
 - `uemail` random unique email address
 - `inet` random ip address
+- `json` string value to random bytes, number value to random digits, keep data structure and key names
+- `nullify` NULL
+- `empty` empty string
+- `const[VALUE]` constant value
 - `nop` untouched
 
 ## Development
@@ -68,7 +72,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pgdump_scrambler.
+Bug reports and pull requests are welcome on GitHub at https://github.com/shunichi/pgdump_scrambler.
 
 ## License
 

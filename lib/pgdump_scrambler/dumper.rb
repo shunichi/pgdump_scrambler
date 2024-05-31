@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+
+require 'pgdump_scrambler/utils'
 require 'open3'
 require 'erb'
 
@@ -11,54 +13,54 @@ module PgdumpScrambler
     end
 
     def run
-      puts "executing pg_dump..."
+      puts 'Executing pg_dump...'
       puts full_command
-      if system(full_command)
-        puts "done!"
-      else
-        raise "pg_dump failed!"
-      end
+      raise 'pg_dump failed!' unless system(env_vars, full_command)
+
+      puts 'Done!'
     end
 
     private
+
+    def env_vars
+      vars = {}
+      vars['PGPASSWORD'] = @db_config['password'] if @db_config['password']
+      vars
+    end
 
     def full_command
       [pgdump_command, obfuscator_command, 'gzip -c'].compact.join(' | ') + "> #{@output_path}"
     end
 
     def obfuscator_command
-      if options = @config.obfuscator_options
-        command = File.expand_path('../../../bin/pgdump-obfuscator', __FILE__)
-        "#{command} #{options}"
-      end
+      return unless (options = @config.obfuscator_options)
+
+      command = File.expand_path('../../bin/pgdump-obfuscator', __dir__)
+      "#{command} #{options}"
     end
 
     def pgdump_command
       command = []
-      command << "PGPASSWORD=#{Shellwords.escape(@db_config['password'])}" if @db_config['password']
       command << 'pg_dump'
       command << @config.pgdump_args if @config.pgdump_args
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
       command << "--host='#{@db_config['host']}'" if @db_config['host']
       command << "--port='#{@db_config['port']}'" if @db_config['port']
-      command << @config.exclude_tables.map { |exclude_table| "--exclude-table-data=#{exclude_table}" }.join(' ') if @config.exclude_tables.present?
+      if @config.exclude_tables.present?
+        command << @config.exclude_tables.map do |exclude_table|
+          "--exclude-table-data=#{exclude_table}"
+        end.join(' ')
+      end
       command << @db_config['database']
       command.join(' ')
     end
 
     def load_database_yml
-      if defined?(Rails)
-        database_yaml_file = File.read(Rails.root.join('config', 'database.yml'))
-        database_yaml_body = ERB.new(database_yaml_file).result
-        # NOTE: Ruby3.1以降ではYAML.loadが廃止されたので、YAML.safe_loadを使う。
-        db_config = if YAML.respond_to?(:safe_load)
-                      YAML.safe_load(database_yaml_body, aliases: true)
-                    else
-                      YAML.load(database_yaml_body)
-                    end
+      return unless defined?(Rails)
 
-        db_config[Rails.env].key?('read_replica') ? db_config[Rails.env]['read_replica'] : db_config[Rails.env]
-      end
+      db_config = Utils.load_yaml_with_erb(Rails.root.join('config', 'database.yml'))
+
+      db_config[Rails.env].key?('read_replica') ? db_config[Rails.env]['read_replica'] : db_config[Rails.env]
     end
   end
 end
