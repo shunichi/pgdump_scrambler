@@ -6,7 +6,7 @@ require 'open3'
 module PgdumpScrambler
   class Dumper
     def initialize(config, db_config = {})
-      @db_config = db_config.empty? ? load_database_yml : config
+      @db_config = db_config.empty? ? load_database_yml : db_config
       @config = config
       @output_path = config.dump_path
     end
@@ -19,16 +19,33 @@ module PgdumpScrambler
       puts 'Done!'
     end
 
+    def full_command
+      [pgdump_command, obfuscator_command, compression_command].compact.join(' | ') + " > #{@output_path}"
+    end
+
+    def compression_command
+      method = @config.compression['method'] || 'gzip'
+      level = @config.compression['level']
+      case method
+      when 'zstd'
+        if level
+          level >= 20 ? "zstd -c --ultra -#{level}" : "zstd -c -#{level}"
+        else
+          'zstd -c'
+        end
+      when 'gzip'
+        level ? "gzip -c -#{level}" : 'gzip -c'
+      else
+        raise "Unknown compression method: #{method}"
+      end
+    end
+
     private
 
     def env_vars
       vars = {}
       vars['PGPASSWORD'] = @db_config['password'] if @db_config['password']
       vars
-    end
-
-    def full_command
-      [pgdump_command, obfuscator_command, 'gzip -c'].compact.join(' | ') + "> #{@output_path}"
     end
 
     def obfuscator_command
@@ -45,7 +62,7 @@ module PgdumpScrambler
       command << "--username=#{Shellwords.escape(@db_config['username'])}" if @db_config['username']
       command << "--host='#{@db_config['host']}'" if @db_config['host']
       command << "--port='#{@db_config['port']}'" if @db_config['port']
-      if @config.exclude_tables.present?
+      if @config.exclude_tables && !@config.exclude_tables.empty?
         command << @config.exclude_tables.map do |exclude_table|
           "--exclude-table-data=#{exclude_table}"
         end.join(' ')

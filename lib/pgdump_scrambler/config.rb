@@ -13,7 +13,9 @@ module PgdumpScrambler
     KEY_TABLES = 'tables'
     KEY_EXCLUDE_TABLES = 'exclude_tables'
     KEY_PGDUMP_ARGS = 'pgdump_args'
+    KEY_COMPRESSION = 'compression'
     KEY_S3 = 's3'
+    DEFAULT_COMPRESSION = { 'method' => 'gzip' }.freeze
     DEFAULT_S3_PROPERTIES = {
       'bucket' => 'YOUR_S3_BUCKET',
       'region' => 'YOUR_S3_REGION',
@@ -21,15 +23,16 @@ module PgdumpScrambler
       'access_key_id' => "<%= ENV['AWS_ACCESS_KEY_ID'] %>",
       'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>"
     }.freeze
-    attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables, :pgdump_args
+    attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables, :pgdump_args, :compression
 
-    def initialize(tables, dump_path, s3, exclude_tables, pgdump_args) # rubocop:disable Naming/MethodParameterName
+    def initialize(tables, dump_path, s3, exclude_tables, pgdump_args, compression: DEFAULT_COMPRESSION) # rubocop:disable Naming/MethodParameterName, Metrics/ParameterLists
       @table_hash = tables.sort_by(&:name).to_h { |table| [table.name, table] }
       @dump_path = dump_path
       @s3 = s3
       @resolved_s3 = s3.transform_values { |v| ERB.new(v).result } if s3
       @exclude_tables = exclude_tables
       @pgdump_args = pgdump_args
+      @compression = normalize_compression(compression)
     end
 
     def table_names
@@ -53,7 +56,7 @@ module PgdumpScrambler
         end
       end
       new_tables += (other.table_names - table_names).map { |table_name| other.table(table_name) }
-      Config.new(new_tables, @dump_path, @s3, @exclude_tables, @pgdump_args)
+      Config.new(new_tables, @dump_path, @s3, @exclude_tables, @pgdump_args, compression: @compression)
     end
 
     def unspecified_columns
@@ -66,6 +69,7 @@ module PgdumpScrambler
     def write(io)
       yml = {}
       yml[KEY_DUMP_PATH] = @dump_path
+      yml[KEY_COMPRESSION] = @compression if @compression != DEFAULT_COMPRESSION
       yml[KEY_S3] = @s3 if @s3
       yml[KEY_EXCLUDE_TABLES] = @exclude_tables if @exclude_tables.size.positive?
       yml[KEY_TABLES] = @table_hash.map do |_, table|
@@ -90,6 +94,37 @@ module PgdumpScrambler
       tables.map(&:options).reject(&:empty?).join(' ')
     end
 
+    VALID_COMPRESSION_METHODS = %w[gzip zstd].freeze
+    COMPRESSION_LEVEL_RANGES = { 'gzip' => 1..9, 'zstd' => 1..22 }.freeze
+
+    private
+
+    def normalize_compression(value)
+      result = case value
+               when String
+                 { 'method' => value }
+               when Hash
+                 value
+               when nil
+                 DEFAULT_COMPRESSION.dup
+               else
+                 raise ArgumentError, "Invalid compression config: #{value.inspect}"
+               end
+      validate_compression!(result)
+      result
+    end
+
+    def validate_compression!(compression)
+      method = compression['method']
+      raise ArgumentError, "Unknown compression method: #{method}" unless VALID_COMPRESSION_METHODS.include?(method)
+
+      level = compression['level']
+      return unless level
+
+      range = COMPRESSION_LEVEL_RANGES[method]
+      raise ArgumentError, "Compression level #{level} out of range for #{method} (#{range})" unless range.cover?(level)
+    end
+
     class << self
       def read(io)
         yml = YAML.safe_load(io, permitted_classes: [], permitted_symbols: [], aliases: true)
@@ -104,7 +139,14 @@ module PgdumpScrambler
           else
             []
           end
-        Config.new(tables, yml[KEY_DUMP_PATH], yml[KEY_S3], yml[KEY_EXCLUDE_TABLES] || [], yml[KEY_PGDUMP_ARGS])
+        Config.new(
+          tables,
+          yml[KEY_DUMP_PATH],
+          yml[KEY_S3],
+          yml[KEY_EXCLUDE_TABLES] || [],
+          yml[KEY_PGDUMP_ARGS],
+          compression: yml[KEY_COMPRESSION]
+        )
       end
 
       def read_file(path)

@@ -124,4 +124,48 @@ RSpec.describe PgdumpScrambler do
     config = PgdumpScrambler::Config.read(StringIO.new(yaml))
     expect(config.pgdump_args).to eq '-xc'
   end
+
+  it 'defaults compression to gzip' do
+    yaml = <<~YAML
+      ---
+      dump_path: scrambled.dump
+      tables:
+        users:
+          email: email
+    YAML
+    config = PgdumpScrambler::Config.read(StringIO.new(yaml))
+    expect(config.compression).to eq({ 'method' => 'gzip' })
+  end
+
+  it 'reads and writes compression config' do
+    yaml = <<~YAML
+      ---
+      dump_path: scrambled.dump.zst
+      compression:
+        method: zstd
+        level: 3
+      tables:
+        users:
+          email: email
+    YAML
+    config = PgdumpScrambler::Config.read(StringIO.new(yaml))
+    expect(config.compression).to eq({ 'method' => 'zstd', 'level' => 3 })
+    io = StringIO.new
+    config.write(io)
+    expect(io.string).to eq yaml
+  end
+
+  it 'does not write compression when gzip default' do
+    yaml = <<~YAML
+      ---
+      dump_path: scrambled.dump.gz
+      tables:
+        users:
+          email: email
+    YAML
+    config = PgdumpScrambler::Config.read(StringIO.new(yaml))
+    io = StringIO.new
+    config.write(io)
+    expect(io.string).not_to include('compression')
+  end
 end
