@@ -3,7 +3,7 @@
 require 'fileutils'
 require 'yaml'
 
-RSpec.describe 'Dump and restore' do
+RSpec.describe 'Dump and restore' do # rubocop:disable RSpec/MultipleMemoizedHelpers
   let(:tmpdir) { 'tmp/dump_test' }
   let(:yaml) do
     YAML.safe_load_file(
@@ -25,7 +25,7 @@ RSpec.describe 'Dump and restore' do
       'host' => host,
       'port' => port.to_s,
       'username' => username,
-      'password' => password.to_s
+      'password' => password.to_s,
     }
   end
   let(:create_table_sql) do
@@ -50,9 +50,9 @@ RSpec.describe 'Dump and restore' do
     system(env, "dropdb --if-exists -h #{host} -p #{port} -U #{username} #{database} 2> /dev/null", exception: true)
     system(env, "createdb -h #{host} -p #{port} -U #{username} #{database}", exception: true)
     system(env, %(psql --quiet -h #{host} -p #{port} -U #{username} -d #{database} -c "#{create_table_sql}"),
-           exception: true)
+      exception: true)
     system(env, %(psql --quiet -h #{host} -p #{port} -U #{username} -d #{database} -c "#{insert_sql}"),
-           exception: true)
+      exception: true)
     FileUtils.rm_rf(tmpdir)
     FileUtils.mkdir_p(tmpdir)
   end
@@ -60,20 +60,23 @@ RSpec.describe 'Dump and restore' do
   after do
     system(env, "dropdb --if-exists -h #{host} -p #{port} -U #{username} #{database} 2> /dev/null", exception: true)
     system(env, "dropdb --if-exists -h #{host} -p #{port} -U #{username} #{restore_database} 2> /dev/null",
-           exception: true)
+      exception: true)
     FileUtils.rm_rf(tmpdir)
   end
 
   def restore_dump(dump_path, decompress_command)
     system(env, "createdb -h #{host} -p #{port} -U #{username} #{restore_database}", exception: true)
     system(env,
-           "#{decompress_command} #{dump_path}" \
-           " | psql --quiet -h #{host} -p #{port} -U #{username} -d #{restore_database} 2> /dev/null",
-           exception: true)
+      "#{decompress_command} #{dump_path} " \
+      "| psql --quiet -h #{host} -p #{port} -U #{username} -d #{restore_database} 2> /dev/null",
+      exception: true)
   end
 
   def query_users
-    output = `PGPASSWORD=#{password} psql -t -A -F',' -h #{host} -p #{port} -U #{username} -d #{restore_database} -c "SELECT id, name, email FROM users ORDER BY id"`
+    sql = 'SELECT id, name, email FROM users ORDER BY id'
+    cmd = "psql -t -A -F',' -h #{host} -p #{port} -U #{username} " \
+          "-d #{restore_database} -c \"#{sql}\""
+    output = `PGPASSWORD=#{password} #{cmd}`
     output.strip.split("\n").map { |line| line.split(',', 3) }
   end
 
@@ -102,8 +105,10 @@ RSpec.describe 'Dump and restore' do
       id, name, email_val = row
       expect(id).to match(/\A[12]\z/)
       # name and email should be scrambled (different from originals)
-      expect(%w[Alice Bob]).not_to include(name)
-      expect(%w[alice@example.com bob@example.com]).not_to include(email_val)
+      expect(name).not_to eq('Alice')
+      expect(name).not_to eq('Bob')
+      expect(email_val).not_to eq('alice@example.com')
+      expect(email_val).not_to eq('bob@example.com')
     end
   end
 
@@ -134,8 +139,10 @@ RSpec.describe 'Dump and restore' do
     rows.each do |row|
       id, name, email_val = row
       expect(id).to match(/\A[12]\z/)
-      expect(%w[Alice Bob]).not_to include(name)
-      expect(%w[alice@example.com bob@example.com]).not_to include(email_val)
+      expect(name).not_to eq('Alice')
+      expect(name).not_to eq('Bob')
+      expect(email_val).not_to eq('alice@example.com')
+      expect(email_val).not_to eq('bob@example.com')
     end
   end
 

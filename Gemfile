@@ -16,5 +16,5 @@ gem 'rspec'
 gem 'rubocop'
 gem 'rubocop-rspec'
 
-gem "simplecov"
-gem "simplecov-lcov"
+gem 'simplecov'
+gem 'simplecov-lcov'

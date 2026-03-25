@@ -1,8 +1,11 @@
 require: rubocop-rspec
 
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.3
   NewCops: enable
+
+Layout/LineLength:
+  Max: 120
 
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutargumentalignment
 Layout/ArgumentAlignment:
@@ -11,6 +14,18 @@ Layout/ArgumentAlignment:
 # https://docs.rubocop.org/rubocop/cops_layout.html#layoutmultilinemethodcallindentation
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: consistent_comma
+
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
 
 Style/Documentation:
   Enabled: false
@@ -40,6 +55,9 @@ RSpec/ExampleLength:
   Enabled: false
 
 RSpec/DescribedClass:
+  Enabled: false
+
+RSpec/DescribeClass:
   Enabled: false
 
 RSpec/MultipleExpectations:

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require "simplecov"
+require 'simplecov'
 require 'pgdump_scrambler'
 
 RSpec.configure do |config|

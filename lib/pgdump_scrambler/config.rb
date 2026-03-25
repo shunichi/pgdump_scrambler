@@ -2,7 +2,6 @@
 
 require 'yaml'
 require 'erb'
-require 'set'
 require 'config/table'
 
 module PgdumpScrambler
@@ -21,7 +20,7 @@ module PgdumpScrambler
       'region' => 'YOUR_S3_REGION',
       'prefix' => 'YOUR_S3_PATH_PREFIX',
       'access_key_id' => "<%= ENV['AWS_ACCESS_KEY_ID'] %>",
-      'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>"
+      'secret_key' => "<%= ENV['AWS_SECRET_KEY'] %>",
     }.freeze
     attr_reader :dump_path, :s3, :resolved_s3, :exclude_tables, :pgdump_args, :compression
 
@@ -78,7 +77,7 @@ module PgdumpScrambler
 
         [
           table.name,
-          columns.to_h { |column| [column.name, column.scramble_method] }
+          columns.to_h { |column| [column.name, column.scramble_method] },
         ]
       end.compact.to_h
       YAML.dump(yml, io)
