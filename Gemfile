@@ -7,11 +7,14 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 # Specify your gem's dependencies in pgdump_scrambler.gemspec
 gemspec
 
-gem 'rails', '~> 7.0'
+gem 'rails', '>= 8.0'
 
-gem 'rake', '~> 13.0'
+gem 'rake'
 
-gem 'rspec', '~> 3.12'
+gem 'rspec'
 
-gem 'rubocop', '1.57.1'
-gem 'rubocop-rspec', '2.24.1'
+gem 'rubocop'
+gem 'rubocop-rspec'
+
+gem 'simplecov'
+gem 'simplecov-lcov'

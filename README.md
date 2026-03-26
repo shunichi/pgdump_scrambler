@@ -64,6 +64,22 @@ bundle exec rake pgdump_scrambler:dump
 - `const[VALUE]` constant value
 - `nop` untouched
 
+## Compression
+
+By default, dump files are compressed with `gzip`. You can use `zstd` instead by adding a `compression` key to your config file.
+
+```yaml
+dump_path: scrambled.dump.zst
+compression:
+  method: zstd
+  level: 3
+```
+
+- `method`: `gzip` (default) or `zstd`
+- `level`: compression level (optional). gzip: 1-9, zstd: 1-22
+
+When using zstd, make sure the `zstd` command is installed on your system.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

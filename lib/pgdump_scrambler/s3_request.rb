@@ -23,7 +23,7 @@ module PgdumpScrambler
         canonical_query_string,
         "host:#{@bucket}.s3.amazonaws.com\n", # canonical headers
         'host', # signed headers
-        'UNSIGNED-PAYLOAD'
+        'UNSIGNED-PAYLOAD',
       ].join("\n")
     end
 
@@ -73,7 +73,7 @@ module PgdumpScrambler
         'AWS4-HMAC-SHA256',
         iso_time,
         "#{iso_date}/#{@region}/s3/aws4_request",
-        Digest::SHA256.hexdigest(canonical_request)
+        Digest::SHA256.hexdigest(canonical_request),
       ].join("\n")
     end
 

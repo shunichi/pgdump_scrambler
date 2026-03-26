@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Scramble pg_dump columns.'
   spec.homepage      = 'https://github.com/shunichi/pgdump_scrambler'
   spec.license       = 'MIT'
-  spec.required_ruby_version = '>= 3.0'
+  spec.required_ruby_version = '>= 3.3'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/shunichi/pgdump_scrambler'

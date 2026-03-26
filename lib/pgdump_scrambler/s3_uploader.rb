@@ -10,7 +10,7 @@ module PgdumpScrambler
 
     def initialize(response)
       @response = response
-      super "S3 upload failed: #{response.body}"
+      super("S3 upload failed: #{response.body}")
     end
   end
 

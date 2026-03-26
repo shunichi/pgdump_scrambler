@@ -1,3 +1,13 @@
+## [Unreleased]
+
+### Added
+
+- Add zstd compression support. Use `compression` key in config to specify method (`gzip` / `zstd`) and level
+
+### Fixed
+
+- Fix `Dumper#initialize` not using `db_config` argument correctly
+
 ## [0.5.0] - 2024-03-01
 
 - Resolve ERB on loading config/database.yml
